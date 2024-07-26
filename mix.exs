@@ -26,6 +26,9 @@ defmodule CloudWatch.Mixfile do
 
       Code.ensure_loaded?(ExAws) ->
         [extra_applications: [:logger, :ex_aws]]
+
+      true ->
+        [extra_applications: [:logger]]
     end
   end
 
