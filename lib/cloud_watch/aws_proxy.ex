@@ -6,88 +6,6 @@ defmodule CloudWatch.AwsProxy do
   """
 
   cond do
-    Code.ensure_loaded?(AWS.Logs) ->
-      # AWS CloudWatch Logs implemented using aws-elixir
-      # See https://github.com/jkakar/aws-elixir
-      # AWS.Logs existed until version 0.6.0
-
-      # AWS credentials are configured in CloudWatch
-      def client(access_key_id, secret_access_key, region, endpoint) do
-        %AWS.Client{
-          access_key_id: access_key_id,
-          secret_access_key: secret_access_key,
-          region: region,
-          endpoint: endpoint
-        }
-      end
-
-      def create_log_group(client, input) do
-        AWS.Logs.create_log_group(client, input)
-      end
-
-      def create_log_stream(client, input) do
-        AWS.Logs.create_log_stream(client, input)
-      end
-
-      def put_log_events(client, input) do
-        AWS.Logs.put_log_events(client, input)
-      end
-
-    Code.ensure_loaded?(AWS.CloudWatchLogs) ->
-      # AWS CloudWatch Logs implemented using aws-elixir
-      # Since v0.7.0, module renamed from Logs to CloudWatchLogs
-
-      # AWS credentials are configured in CloudWatch
-      def client(access_key_id, secret_access_key, region, endpoint) do
-        %AWS.Client{
-          access_key_id: access_key_id,
-          secret_access_key: secret_access_key,
-          region: region,
-          endpoint: endpoint
-        }
-      end
-
-      def create_log_group(client, input) do
-        AWS.CloudWatchLogs.create_log_group(client, input) |> transform_errors()
-      end
-
-      def create_log_stream(client, input) do
-        AWS.CloudWatchLogs.create_log_stream(client, input) |> transform_errors()
-      end
-
-      def put_log_events(client, input) do
-        AWS.CloudWatchLogs.put_log_events(client, input) |> transform_errors()
-      end
-
-      # transform the response to format returned by previous AWS versions
-      defp transform_errors({:error, {:unexpected_response, %{body: body}}} = response) do
-        # Example from AWS 0.7.0:
-        #  {:error,
-        #   {:unexpected_response,
-        #    %{
-        #      body: "{\"__type\":\"ResourceNotFoundException\",\"message\":\"The specified log group does not exist.\"}",
-        #      headers: [...],
-        #      status_code: 400
-        #    }}}
-        #
-        # Expected output: {:error, {"ResourceNotFoundException", "The specified log group does not exist."}}
-        #
-        # Body is a JSON. AWS 0.7.0 depends on Jason parser
-        try do
-          error = Jason.decode!(body)
-          exception = error["__type"]
-          message = error["message"]
-          {:error, {exception, message}}
-        catch
-          _parsing_error ->
-            response
-        end
-      end
-
-      defp transform_errors(response) do
-        response
-      end
-
     Code.ensure_loaded?(ExAws) ->
       # AWS CloudWatch Logs implemented using ex_aws
       #  See https://github.com/ex-aws/ex_aws
@@ -141,19 +59,19 @@ defmodule CloudWatch.AwsProxy do
     true ->
       # No AWS library found
       def client(_access_key_id, _secret_access_key, _region, _endpoint) do
-        raise ":aws or :ex_aws must be added as a dependency to use this module"
+        raise ":ex_aws must be added as a dependency to use this module"
       end
 
       def create_log_group(_client, _input) do
-        raise ":aws or :ex_aws must be added as a dependency to use this module"
+        raise ":ex_aws must be added as a dependency to use this module"
       end
 
       def create_log_stream(_client, _input) do
-        raise ":aws or :ex_aws must be added as a dependency to use this module"
+        raise ":ex_aws must be added as a dependency to use this module"
       end
 
       def put_log_events(_client, _input) do
-        raise ":aws or :ex_aws must be added as a dependency to use this module"
+        raise ":ex_aws must be added as a dependency to use this module"
       end
   end
 end

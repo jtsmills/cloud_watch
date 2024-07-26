@@ -20,16 +20,7 @@ defmodule CloudWatch.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    cond do
-      Code.ensure_loaded?(AWS) ->
-        [extra_applications: [:logger, :aws]]
-
-      Code.ensure_loaded?(ExAws) ->
-        [extra_applications: [:logger, :ex_aws]]
-
-      true ->
-        [extra_applications: [:logger]]
-    end
+    [extra_applications: [:logger, :ex_aws]]
   end
 
   # This makes sure your factory and any other modules in test/support are compiled
@@ -48,8 +39,6 @@ defmodule CloudWatch.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:aws, "<= 0.7.0 or ~> 0.8", optional: true},
-      # Include mime for ex_aws; mime 2.x requires Elixir ~> 1.10
       {:mime, "<= 1.2.0 or ~> 2.0", optional: true},
       {:ex_aws, "~> 2.2", optional: true},
       {:httpoison, ">= 0.11.1"},
